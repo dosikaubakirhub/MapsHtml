@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Географ-Эксперт: Глобус и Карта</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .game-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 95%;
+            border-bottom: 6px solid #2196F3;
+        }
+
+        h1 {
+            color: #0277BD;
+            margin-top: 0;
+        }
+
+        .icon-header {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .question-box {
+            font-size: 20px;
+            margin: 20px 0;
+            line-height: 1.5;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        .btn-blue { background-color: #2196F3; }
+        .btn-blue:hover { background-color: #1976D2; }
+
+        .btn-green { background-color: #4CAF50; }
+        .btn-green:hover { background-color: #388E3C; }
+
+        .btn-orange { background-color: #FF9800; }
+        .btn-orange:hover { background-color: #F57C00; }
+
+        .btn-purple { background-color: #9C27B0; }
+        .btn-purple:hover { background-color: #7B1FA2; }
+
+        input[type="text"] {
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            width: 70%;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            font-weight: bold;
+            min-height: 60px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .correct { background-color: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; }
+        .wrong { background-color: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+
+        .progress {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
+        }
+
+        .hidden { display: none; }
+
+        /* Стили для сортировки */
+        .sort-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .sort-word {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            animation: popIn 0.5s;
+        }
+        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+        #result-screen h2 { color: #2E7D32; }
+        .score-display { font-size: 40px; font-weight: bold; color: #0277BD; margin: 20px 0; }
+        
+        .restart-btn {
+            background-color: #FF5722;
+            color: white;
+            font-size: 18px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="icon-header">🌍🗺️</div>
+    <h1>Географ-Эксперт</h1>
+    <div style="font-size: 14px; color: #666; margin-bottom: 20px;">Тема: Глобус, карта, материки и океаны</div>
+
+    <div id="game-area">
+        <div class="question-box" id="question-text">
+            <!-- Вопрос -->
+        </div>
+
+        <div id="input-area" class="hidden">
+            <input type="text" id="user-answer" placeholder="Введите ответ..." autocomplete="off">
+            <br>
+            <button class="btn-green" onclick="checkInput()">Ответить</button>
+        </div>
+
+        <div id="buttons-area" class="options-grid">
+            <!-- Кнопки -->
+        </div>
+
+        <div id="sort-area" class="hidden">
+            <div class="sort-word" id="sort-word-display">Слово</div>
+            <div class="options-grid">
+                <button class="btn-blue" id="sort-btn-1" onclick="checkSort(1)">Группа 1</button>
+                <button class="btn-orange" id="sort-btn-2" onclick="checkSort(2)">Группа 2</button>
+            </div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="progress" id="progress">Задание 1 из 10</div>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <h2>Путешествие завершено! 🚀</h2>
+        <p>Ты знаешь географию на:</p>
+        <div class="score-display" id="final-score">0 / 10</div>
+        <p id="final-message"></p>
+        <button class="restart-btn" onclick="restartGame()">Начать заново</button>
+    </div>
+</div>
+
+<script>
+    // База данных вопросов (10 заданий)
+    const questions = [
+        {
+            type: 'choice',
+            q: "Что такое глобус?",
+            options: ["Плоское изображение Земли", "Уменьшенная модель Земли в форме шара", "Список всех стран мира", "Прибор для измерения температуры"],
+            correct: 1, // Индекс правильного ответа (0, 1, 2, 3)
+            hint: "Глобус — это шар, на котором изображена наша планета."
+        },
+        {
+            type: 'choice',
+            q: "Какой океан самый большой и глубокий на Земле?",
+            options: ["Атлантический", "Индийский", "Тихий", "Северный Ледовитый"],
+            correct: 2,
+            hint: "Тихий океан занимает почти половину всей водной поверхности Земли."
+        },
+        {
+            type: 'input',
+            q: "Назови самый маленький материк на Земле.",
+            correct: "австралия",
+            hint: "Этот материк находится в Южном полушарии, и на нем живет много кенгуру."
+        },
+        {
+            type: 'sort',
+            q: "Распредели объекты. Куда относится: <b>Африка</b>?",
+            group1: "Материки",
+            group2: "Океаны",
+            correctGroup: 1, // 1 или 2
+            word: "Африка"
+        },
+        {
+            type: 'choice',
+            q: "Что показывает масштаб на карте?",
+            options: ["Стороны света", "Во сколько раз уменьшены реальные размеры", "Глубину океана", "Высоту гор"],
+            correct: 1,
+            hint: "Масштаб помогает понять расстояние. Например, 1 см на карте = 100 км в реальности."
+        },
+        {
+            type: 'sort',
+            q: "Распредели объекты. Куда относится: <b>Атлантический</b>?",
+            group1: "Материки",
+            group2: "Океаны",
+            correctGroup: 2,
+            word: "Атлантический"
+        },
+        {
+            type: 'input',
+            q: "Как называется воображаемая линия, делящая Землю на Северное и Южное полушария?",
+            correct: "экватор",
+            hint: "Это самая длинная параллель, опоясывающая Землю посередине."
+        },
+        {
+            type: 'choice',
+            q: "Сколько всего материков на Земле?",
+            options: ["4", "5", "6", "7"],
+            correct: 2, // В российской школе обычно 6: Евразия, Африка, Сев. Америка, Юж. Америка, Австралия, Антарктида
+            hint: "Евразия, Африка, Северная Америка, Южная Америка, Австралия, Антарктида."
+        },
+        {
+            type: 'sort',
+            q: "Распредели объекты. Куда относится: <b>Евразия</b>?",
+            group1: "Материки",
+            group2: "Океаны",
+            correctGroup: 1,
+            word: "Евразия"
+        },
+        {
+            type: 'choice',
+            q: "Какой цвет на физической карте обычно обозначает воду?",
+            options: ["Зеленый", "Коричневый", "Синий / Голубой", "Желтый"],
+            correct: 2,
+            hint: "Оттенки синего показывают глубину: чем темнее, тем глубже."
+        }
+    ];
+
+    let currentQIndex = 0;
+    let score = 0;
+    let canAnswer = true;
+
+    const gameArea = document.getElementById('game-area');
+    const resultScreen = document.getElementById('result-screen');
+    const questionText = document.getElementById('question-text');
+    const buttonsArea = document.getElementById('buttons-area');
+    const inputArea = document.getElementById('input-area');
+    const sortArea = document.getElementById('sort-area');
+    const feedbackEl = document.getElementById('feedback');
+    const progressEl = document.getElementById('progress');
+    const userInput = document.getElementById('user-answer');
+
+    function loadQuestion() {
+        canAnswer = true;
+        feedbackEl.innerHTML = '';
+        feedbackEl.className = 'feedback';
+        progressEl.textContent = `Задание ${currentQIndex + 1} из ${questions.length}`;
+        
+        const q = questions[currentQIndex];
+        questionText.innerHTML = q.q;
+
+        // Скрываем все области ввода
+        buttonsArea.classList.add('hidden');
+        inputArea.classList.add('hidden');
+        sortArea.classList.add('hidden');
+
+        if (q.type === 'choice') {
+            buttonsArea.classList.remove('hidden');
+            buttonsArea.innerHTML = '';
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-blue';
+                btn.textContent = opt;
+                btn.onclick = () => checkChoice(index);
+                buttonsArea.appendChild(btn);
+            });
+        } else if (q.type === 'input') {
+            inputArea.classList.remove('hidden');
+            userInput.value = '';
+            userInput.focus();
+            // Обработка Enter
+            userInput.onkeydown = function(e) {
+                if(e.key === 'Enter') checkInput();
+            };
+        } else if (q.type === 'sort') {
+            sortArea.classList.remove('hidden');
+            document.getElementById('sort-word-display').textContent = q.word;
+            document.getElementById('sort-btn-1').textContent = q.group1;
+            document.getElementById('sort-btn-2').textContent = q.group2;
+        }
+    }
+
+    function checkChoice(selectedIndex) {
+        if (!canAnswer) return;
+        canAnswer = false;
+        const q = questions[currentQIndex];
+        
+        if (selectedIndex === q.correct) {
+            score++;
+            showFeedback(true, "Верно! 🎉");
+        } else {
+            showFeedback(false, `Ошибка. ${q.hint}`);
+        }
+        nextStep();
+    }
+
+    function checkInput() {
+        if (!canAnswer) return;
+        const val = userInput.value.trim().toLowerCase();
+        if (val === "") return; // Не принимать пустой ответ
+
+        canAnswer = false;
+        const q = questions[currentQIndex];
+
+        if (val === q.correct) {
+            score++;
+            showFeedback(true, "Правильно! 🌟");
+        } else {
+            showFeedback(false, `Неверно. Правильный ответ: ${q.correct}. ${q.hint}`);
+        }
+        nextStep();
+    }
+
+    function checkSort(groupIndex) {
+        if (!canAnswer) return;
+        canAnswer = false;
+        const q = questions[currentQIndex];
+
+        if (groupIndex === q.correctGroup) {
+            score++;
+            showFeedback(true, "Отлично! 🗺️");
+        } else {
+            showFeedback(false, `Ошибка. ${q.hint}`);
+        }
+        nextStep();
+    }
+
+    function showFeedback(isCorrect, text) {
+        feedbackEl.textContent = text;
+        feedbackEl.classList.add(isCorrect ? 'correct' : 'wrong');
+    }
+
+    function nextStep() {
+        setTimeout(() => {
+            currentQIndex++;
+            if (currentQIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }, 2500);
+    }
+
+    function showResults() {
+        gameArea.classList.add('hidden');
+        resultScreen.classList.remove('hidden');
+        document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+        
+        const msg = document.getElementById('final-message');
+        if (score === 10) {
+            msg.textContent = "Ты настоящий профессор географии! 🎓🌍";
+        } else if (score >= 7) {
+            msg.textContent = "Хороший результат! Ты хорошо знаешь карту. 👍";
+        } else {
+            msg.textContent = "Стоит еще раз посмотреть на глобус и повторить названия. 📚";
+        }
+    }
+
+    function restartGame() {
+        currentQIndex = 0;
+        score = 0;
+        resultScreen.classList.add('hidden');
+        gameArea.classList.remove('hidden');
+        loadQuestion();
+    }
+
+    // Запуск игры
+    loadQuestion();
+
+</script>
+
+</body>
+</html>
